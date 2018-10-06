@@ -1,8 +1,11 @@
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class Salle {
 	private final int nbRang;
 	private final int nbPlacesParRang;
 	private boolean[][] placesLibres;
+	private Hashtable t;
 	
 	public Salle(int nbRang, int nbPlacesParRang) {
 		this.nbRang = nbRang;
@@ -20,9 +23,9 @@ public class Salle {
 		for(int i=0; i<nbRang; i++) {
 			for(int j=0; j<nbPlacesParRang; j++) {
 				if(placesLibres[i][j]) {
-					s += "True ";
+					s += "O ";
 				}else {
-					s += "False ";
+					s += "F ";
 				}
 			}
 			s += "\n";
@@ -30,81 +33,83 @@ public class Salle {
 		return s;
 	}
 	
+	public void set(boolean val, int i, int j) {
+		placesLibres[i][j] = val;
+	}
+	
 	public void affiche() {
 		System.out.println(this.toString());
 	}
 	
-	private boolean capaciteOK(int n) {
+	private int getNbLibre() {
 		int cpt = 0;
 		for(int i=0; i<nbRang; i++) {
 			for(int j=0; j<nbPlacesParRang; j++) {
-				if(placesLibres[i][j] == true) {
+				if(placesLibres[i][j])
 					cpt++;
-				}
-				if(cpt == n) {
-					return true;
-				}
 			}
 		}
-		return false;
+		return cpt;
+	}
+	
+	private boolean capaciteOK(int n) {
+		return this.getNbLibre() >= n;
 	}
 	
 	private int nContiguesAuRangI(int n, int i) {
-		int cpt = 0;
-		for(int j=0; j<placesLibres[i].length; j++) {
-			if(placesLibres[i][j] == false) {
-				cpt = 0;
-			}else {
+		for(int j=0; j<nbPlacesParRang; j++) {
+			int cpt = 0;
+			while(cpt+j<nbPlacesParRang && placesLibres[i][j+cpt] && cpt<=n-1) {
 				cpt++;
-				if(cpt>=n) {
-					return j-n;
+			}
+			if(cpt == n) {
+				cpt--;
+				//effectuer la réservation de n places contigues au rang i
+				while(cpt>=0) {
+					placesLibres[i][j+cpt] = false;
+					cpt--;
 				}
+				return j;
 			}
 		}
 		return -1;
 	}
 	
-	private boolean reserverContigues(int n) {
+	public boolean reserverContigues(int n) {
 		for(int i=0; i<nbRang; i++) {
-			int res = nContiguesAuRangI(n, i);
-			if(res != -1) {
-				int cpt = 0;
-				while(cpt != n) {
-					placesLibres[i][res+cpt] = false;
-					cpt++;
-				}
+			if(nContiguesAuRangI(n, i) != -1)
 				return true;
-			}
 		}
 		return false;
+	}
+	
+	private void reserverNonContigues(int n) {
+		int cpt = 0;
+		for(int i=0; i<nbRang; i++) {
+			for(int j=0; j<nbPlacesParRang; j++) {
+				if(placesLibres[i][j]) {
+					placesLibres[i][j] = false;
+					cpt++;
+					if(cpt == n)
+						return;
+				}
+			}
+		}
 	}
 	
 	private boolean reserver(int n) {
-		int cpt = 0;
-		if(capaciteOK(n)) {
-			for(int i=0; i<nbRang; i++) {
-				for(int j=0; j<nbPlacesParRang; j++) {
-					if(placesLibres[i][j] == true) {
-						cpt++;
-						placesLibres[i][j] = false;
-						if(cpt == n) {
-							return true;
-						}else {
-							continue;
-						}
-					}else {
-						continue;
-					}
-				}
-			}
+		if(!capaciteOK(n)) {
+			System.out.println("depasse la capacite de salle");
+			return false;
+		}else if(reserverContigues(n)) {
+			return true;
+		}else {
+			reserverNonContigues(n);
+			return true;
 		}
-		
-		return false;
 	}
 	
 	public synchronized boolean reserver(Groupe g) {
-		if(reserverContigues(g.getNbPersonnes()) == false)
-			return reserver(g.getNbPersonnes());
-		return reserverContigues(g.getNbPersonnes());
+		return reserver(g.getNbPersonnes());
 	}
 }
