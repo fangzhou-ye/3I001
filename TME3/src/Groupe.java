@@ -1,7 +1,7 @@
 import java.util.Arrays;
 import java.util.Stack;
 
-public class Groupe implements 	Runnable{
+public class Groupe implements Runnable{
 	private final int idGroupe;
 	private static int cpt = 0;
 	private static Object mutex = new Object();
