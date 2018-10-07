@@ -1,11 +1,9 @@
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Stack;
 
 public class Salle {
 	private final int nbRang;
 	private final int nbPlacesParRang;
 	private boolean[][] placesLibres;
-	private Hashtable t;
 	
 	public Salle(int nbRang, int nbPlacesParRang) {
 		this.nbRang = nbRang;
@@ -56,7 +54,7 @@ public class Salle {
 		return this.getNbLibre() >= n;
 	}
 	
-	private int nContiguesAuRangI(int n, int i) {
+	private int nContiguesAuRangI(int n, int i, Groupe g) {
 		for(int j=0; j<nbPlacesParRang; j++) {
 			int cpt = 0;
 			while(cpt+j<nbPlacesParRang && placesLibres[i][j+cpt] && cpt<=n-1) {
@@ -67,6 +65,7 @@ public class Salle {
 				//effectuer la réservation de n places contigues au rang i
 				while(cpt>=0) {
 					placesLibres[i][j+cpt] = false;
+					g.ajoutePlace(i, j+cpt);
 					cpt--;
 				}
 				return j;
@@ -75,20 +74,21 @@ public class Salle {
 		return -1;
 	}
 	
-	public boolean reserverContigues(int n) {
+	public boolean reserverContigues(int n, Groupe g) {
 		for(int i=0; i<nbRang; i++) {
-			if(nContiguesAuRangI(n, i) != -1)
+			if(nContiguesAuRangI(n, i, g) != -1)
 				return true;
 		}
 		return false;
 	}
 	
-	private void reserverNonContigues(int n) {
+	private void reserverNonContigues(int n, Groupe g) {
 		int cpt = 0;
 		for(int i=0; i<nbRang; i++) {
 			for(int j=0; j<nbPlacesParRang; j++) {
 				if(placesLibres[i][j]) {
 					placesLibres[i][j] = false;
+					g.ajoutePlace(i, j);
 					cpt++;
 					if(cpt == n)
 						return;
@@ -97,19 +97,35 @@ public class Salle {
 		}
 	}
 	
-	private boolean reserver(int n) {
+	private boolean reserver(int n, Groupe g) {
 		if(!capaciteOK(n)) {
 			System.out.println("depasse la capacite de salle");
 			return false;
-		}else if(reserverContigues(n)) {
+		}else if(reserverContigues(n, g)) {
 			return true;
 		}else {
-			reserverNonContigues(n);
+			reserverNonContigues(n, g);
 			return true;
 		}
 	}
 	
 	public synchronized boolean reserver(Groupe g) {
-		return reserver(g.getNbPersonnes());
+		return reserver(g.getNbPersonnes(), g);
 	}
+	
+	public void annuler(int n, Groupe g) {
+		Stack<Paire> places = g.getPlaces();
+		if(!places.isEmpty() && places.size() >= n) {
+			for(int i=0; i<n; i++) {
+				Paire p = places.pop();
+				placesLibres[p.getI()][p.getJ()] = true;
+			}
+		}
+	}
+	
+	public void annulerTout(Groupe g) {
+		annuler(g.getNbPersonnes(), g);
+	}
+	
+	
 }
