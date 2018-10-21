@@ -8,10 +8,19 @@ public class Chargeur implements Runnable {
 		this.c = c;
 	}
 	
+	public AleaStock getstock() {
+		return stock;
+	}
+	
 	public int getObjetPoidsMin() {
 		return stock.getPoidsMin();
 	}
 	
+	public int getNbStockRestant() {
+		return stock.getListObjet().size();
+	}
+	
+	/*
 	public AleaObjet prendObjet() {
 		if(!stock.estVide()) {
 			for(AleaObjet obj : stock.getListObjet()) {
@@ -26,12 +35,20 @@ public class Chargeur implements Runnable {
 		}
 		System.out.println("fin de chargement : stock est vide");
 		return null;
+	}*/
+	
+	public AleaObjet prendObjet() {
+		AleaObjet obj = stock.getListObjet().get(0).clone();
+		stock.getListObjet().remove(0);
+		return obj;
 	}
 	
 	@Override
 	public void run() {
 		try {
-			c.charger(this);
+			while(true) {
+				c.charger(this);
+			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

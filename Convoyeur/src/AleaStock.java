@@ -22,13 +22,17 @@ public class AleaStock {
 	}
 	
 	public int getPoidsMin() {
-		int min = listObjet.get(0).getPoids();
-		for(AleaObjet obj : listObjet) {
-			if(obj.getPoids() < min) {
-				min = obj.getPoids();
+		if(listObjet.size() != 0) {
+			int min = listObjet.get(0).getPoids();
+			for(AleaObjet obj : listObjet) {
+				if(obj.getPoids() < min) {
+					min = obj.getPoids();
+				}
 			}
+			return min;
+		}else {
+			return -1;
 		}
-		return min;
 	}
 	
 	public void append(AleaObjet obj) {
@@ -40,9 +44,12 @@ public class AleaStock {
 	}
 	
 	public void affiche() {
+		System.out.println("Stock ----------");
 		for(AleaObjet obj : listObjet) {
-			System.out.println(obj);
+			System.out.print("[id:" + obj.getId() + " poids:" + obj.getPoids() + "]");
 		}
+		System.out.println();
+		System.out.println();
 	}
 	
 }
