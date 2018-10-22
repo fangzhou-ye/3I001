@@ -14,7 +14,6 @@ public class AleaObjet {
 		this.poids = obj.getPoids();
 	}
 	
-	/*
 	public AleaObjet(int min, int max) {
 		synchronized(mutex) {
 			id = ++cpt;
@@ -24,12 +23,11 @@ public class AleaObjet {
 		this.max = max;
 		poids = rd.nextInt(max-min+1)+min;
 	}
-	*/
 	
-	public AleaObjet(int id, int poids) {
+	/*public AleaObjet(int id, int poids) {
 		this.id = id;
 		this.poids = poids;
-	}
+	}*/
 	
 	public int getId() {
 		return id;
