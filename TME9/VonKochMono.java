@@ -26,7 +26,8 @@ public class VonKochMono {
 		
 		while(!exec.isTerminated()) {
 			try {
-				Thread.sleep(1000);
+				System.out.println("attends");
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
